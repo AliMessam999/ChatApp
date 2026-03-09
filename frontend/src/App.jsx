@@ -13,57 +13,8 @@ export default function App() {
     const [text, setText] = useState('');
 
     useEffect(() => {
-        socket.current = connectWS();
-
-        socket.current.on('connect', () => {
-            socket.current.on('roomNotice', (userName) => {
-                console.log(`${userName} joined to group!`);
-            });
-
-            socket.current.on('chatMessage', (msg) => {
-                // push to existing messages list
-                console.log('msg', msg);
-                setMessages((prev) => [...prev, msg]);
-            });
-
-            socket.current.on('typing', (userName) => {
-                setTypers((prev) => {
-                    const isExist = prev.find((typer) => typer === userName);
-                    if (!isExist) {
-                        return [...prev, userName];
-                    }
-
-                    return prev;
-                });
-            });
-
-            socket.current.on('stopTyping', (userName) => {
-                setTypers((prev) => prev.filter((typer) => typer !== userName));
-            });
-        });
-
-        return () => {
-            socket.current.off('roomNotice');
-            socket.current.off('chatMessage');
-            socket.current.off('typing');
-            socket.current.off('stopTyping');
-        };
+      connectWS();
     }, []);
-
-    useEffect(() => {
-        if (text) {
-            socket.current.emit('typing', userName);
-            clearTimeout(timer.current);
-        }
-
-        timer.current = setTimeout(() => {
-            socket.current.emit('stopTyping', userName);
-        }, 1000);
-
-        return () => {
-            clearTimeout(timer.current);
-        };
-    }, [text, userName]);
 
     // FORMAT TIMESTAMP TO HH:MM FOR MESSAGES
     function formatTime(ts) {
