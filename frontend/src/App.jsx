@@ -16,6 +16,7 @@ export default function App() {
 
     useEffect(() => {
       socket.current = connectWS();
+
       socket.current.on("connect", () => {
         socket.current.on('roomNotice', (userName) => {
             toast.info(`${userName} joined the room`);
@@ -33,7 +34,15 @@ export default function App() {
         socket.current.on("stopTyping", (userName) => {
             setTypers((prev) => prev.filter((typer) => typer !== userName));
         });
-      })
+      });
+
+      return () => {
+        socket.current.off('connect');
+        socket.current.off('roomNotice');
+        socket.current.off('chatMessage');
+        socket.current.off('typing');
+        socket.current.off('stopTyping');
+      }
     }, []);
 
     useEffect(() => {
