@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { connectWS } from './ws';
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function App() {
     const timer = useRef(null);
@@ -16,7 +18,8 @@ export default function App() {
       socket.current = connectWS();
       socket.current.on("connect", () => {
         socket.current.on('roomNotice', (userName) => {
-            console.log(userName, 'joined the room');
+            console.log(userName, 'joined');
+            toast.info(`${userName} joined the room`);
         })
         socket.current.on('chatMessage', (msg) => {
             setMessages((prev) => [...prev, msg]);
@@ -99,6 +102,7 @@ export default function App() {
                     </div>
                 </div>
             )}
+            <ToastContainer />
 
             {/* CHAT WINDOW */}
             {!showNamePopup && (

@@ -21,7 +21,7 @@ io.on('connection', (socket) => {
   console.log('a user connected', socket.id);
 
   socket.on('joinRoom', async (userName) => {
-    console.log(`${userName} joined the room`);
+    // console.log(`${userName} joined the room`);
 
     await socket.join(ROOM);
 
