@@ -18,14 +18,37 @@ export default function App() {
       socket.current = connectWS();
       socket.current.on("connect", () => {
         socket.current.on('roomNotice', (userName) => {
-            console.log(userName, 'joined');
             toast.info(`${userName} joined the room`);
-        })
+        });
         socket.current.on('chatMessage', (msg) => {
             setMessages((prev) => [...prev, msg]);
-        })
+        });
+        socket.current.on('typing', (userName) => {
+            setTypers((prev) => {
+                const isExist = prev.find((typer) => typer === userName);
+                if(isExist) return prev;
+                return [...prev, userName];
+            });
+        });
+        socket.current.on("stopTyping", (userName) => {
+            setTypers((prev) => prev.filter((typer) => typer !== userName));
+        });
       })
     }, []);
+
+    useEffect(() => {
+        if(text.length > 0){
+            socket.current.emit('typing', userName);
+            clearTimeout(timer.current);
+        }
+        timer.current = setTimeout(() => {
+            socket.current.emit('stopTyping', userName);       
+        }, 1000);
+
+        return () => {
+            clearTimeout(timer.current);
+        }
+    }, [text, userName]);
 
     // FORMAT TIMESTAMP TO HH:MM FOR MESSAGES
     function formatTime(ts) {
@@ -119,7 +142,7 @@ export default function App() {
 
                             {typers.length ? (
                                 <div className="text-xs text-gray-500">
-                                    Someone is typing...
+                                    {typers.join(', ')} is typing...
                                 </div>
                             ) : (
                                 ''
