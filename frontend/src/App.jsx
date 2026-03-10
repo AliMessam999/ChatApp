@@ -13,7 +13,15 @@ export default function App() {
     const [text, setText] = useState('');
 
     useEffect(() => {
-      connectWS();
+      socket.current = connectWS();
+      socket.current.on("connect", () => {
+        socket.current.on('roomNotice', (userName) => {
+            console.log(userName, 'joined the room');
+        })
+        socket.current.on('chatMessage', (msg) => {
+            setMessages((prev) => [...prev, msg]);
+        })
+      })
     }, []);
 
     // FORMAT TIMESTAMP TO HH:MM FOR MESSAGES
@@ -30,11 +38,10 @@ export default function App() {
         const trimmed = inputName.trim();
         if (!trimmed) return;
 
-        // join room
-        socket.current.emit('joinRoom', trimmed);
-
+        
         setUserName(trimmed);
         setShowNamePopup(false);
+        socket.current.emit('joinRoom', trimmed);
     }
 
     // SEND MESSAGE FUNCTION
@@ -140,7 +147,7 @@ export default function App() {
                                             {m.text}
                                         </div>
                                         <div className="flex justify-between items-center mt-1 gap-16">
-                                            <div className="text-[11px] font-bold">{m.sender}</div>
+                                            <div className="text-[11px] font-bold">{mine ? null : m.sender}</div>
                                             <div className="text-[11px] text-gray-500 text-right">
                                                 {formatTime(m.ts)}
                                             </div>
