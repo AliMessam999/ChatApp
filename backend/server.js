@@ -4,7 +4,6 @@ import { Server } from 'socket.io';
 
 const app = express();
 const server = createServer(app);
-const ROOM = "group";
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173",
@@ -20,28 +19,24 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('a user connected', socket.id);
 
-  socket.on('joinRoom', async (userName) => {
-    // console.log(`${userName} joined the room`);
-
-    await socket.join(ROOM);
-
-    // send to all
-    // io.to(ROOM).emit('roomNotice', userName);
-
-    // Broadcast to all except the sender
-    socket.to(ROOM).emit('roomNotice', userName);
+  // Join a specific room
+  socket.on('joinRoom', async ({ roomName, userName }) => {
+    await socket.join(roomName);
+    console.log(`${userName} joined ${roomName}`);
+    // Notify other users in that room
+    socket.to(roomName).emit('roomNotice', userName);
   });
 
-  socket.on('chatMessage', (msg) => {
-    socket.to(ROOM).emit('chatMessage', msg);
+  socket.on('chatMessage', ({ roomName, msg }) => {
+    socket.to(roomName).emit('chatMessage', msg);
   });
 
-  socket.on('typing', (userName) => {
-    socket.to(ROOM).emit('typing', userName);
+  socket.on('typing', ({ roomName, userName }) => {
+    socket.to(roomName).emit('typing', userName);
   });
-  
-  socket.on('stopTyping', (userName) => {
-    socket.to(ROOM).emit('stopTyping', userName);
+
+  socket.on('stopTyping', ({ roomName, userName }) => {
+    socket.to(roomName).emit('stopTyping', userName);
   });
 });
 
