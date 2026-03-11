@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { connectWS } from './ws';
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { IoIosSend } from "react-icons/io";
+
 
 export default function App() {
     const timer = useRef(null);
@@ -67,19 +69,19 @@ export default function App() {
         return `${hh}:${mm}`;
     }
 
-    // SUBMIT NAME TO GET STARTED, OPEN CHAT WINDOW WITH INITIAL MESSAGE
+    // SUBMIT NAME TO GET STARTED, OPEN CHAT WINDOW WITH INITIAL MESSAGE(Observed)
     function handleNameSubmit(e) {
         e.preventDefault();
         const trimmed = inputName.trim();
+        // console.log(trimmed);
         if (!trimmed) return;
 
-        
         setUserName(trimmed);
         setShowNamePopup(false);
         socket.current.emit('joinRoom', trimmed);
     }
 
-    // SEND MESSAGE FUNCTION
+    // SEND MESSAGE FUNCTION(Observed)
     function sendMessage() {
         const t = text.trim();
         if (!t) return;
@@ -92,6 +94,7 @@ export default function App() {
             ts: Date.now(),
         };
         setMessages((m) => [...m, msg]);
+        console.log(msg);
 
         // emit
         socket.current.emit('chatMessage', msg);
@@ -99,7 +102,7 @@ export default function App() {
         setText('');
     }
 
-    // HANDLE ENTER KEY TO SEND MESSAGE
+    // HANDLE ENTER KEY TO SEND MESSAGE(Observed)
     function handleKeyDown(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -141,8 +144,8 @@ export default function App() {
                 <div className="w-full max-w-2xl h-[90vh] bg-white rounded-xl shadow-md flex flex-col overflow-hidden">
                     {/* CHAT HEADER */}
                     <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
-                        <div className="h-10 w-10 rounded-full bg-[#075E54] flex items-center justify-center text-white font-semibold">
-                            R
+                        <div className="h-15 w-15 rounded-full bg-black flex items-center justify-center text-white font-semibold">
+                            Room
                         </div>
                         <div className="flex-1">
                             <div className="text-sm font-medium text-[#303030]">
@@ -170,16 +173,14 @@ export default function App() {
                         {messages.map((m) => {
                             const mine = m.sender === userName;
                             return (
-                                <div
-                                    key={m.id}
-                                    className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
+                                <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                                     <div
-                                        className={`max-w-[78%] p-3 my-2 rounded-[18px] text-sm leading-5 shadow-sm ${
+                                        className={`max-w-[78%] p-3 my-2 rounded-[18px] text-sm leading-5 shadow-lg ${
                                             mine
                                                 ? 'bg-[#DCF8C6] text-[#303030] rounded-br-2xl'
                                                 : 'bg-white text-[#303030] rounded-bl-2xl'
                                         }`}>
-                                        <div className="break-words whitespace-pre-wrap">
+                                        <div>
                                             {m.text}
                                         </div>
                                         <div className="flex justify-between items-center mt-1 gap-16">
@@ -207,8 +208,8 @@ export default function App() {
                             />
                             <button
                                 onClick={sendMessage}
-                                className="bg-green-500 text-white px-4 py-2 mr-2 rounded-full text-sm font-medium cursor-pointer">
-                                Send
+                                className="bg-black text-white px-2 py-2 mr-2 text-center rounded-full text-sm font-medium cursor-pointer">
+                                <IoIosSend className='!text-center' size={25} />
                             </button>
                         </div>
                     </div>
